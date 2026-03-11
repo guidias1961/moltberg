@@ -68,10 +68,9 @@ export async function POST(req: NextRequest) {
 
         const body = { projectName, pitch, niche };
 
-        // Determine base URL from request
-        const protocol = req.headers.get('x-forwarded-proto') || 'http';
-        const host = req.headers.get('host') || 'localhost:3000';
-        const baseUrl = `${protocol}://${host}`;
+        // Determine base URL from request or environment
+        const origin = req.nextUrl.origin;
+        const baseUrl = origin !== 'http://localhost:3000' && origin !== 'http://:' ? origin : (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
 
         console.log(`[TRIBUNAL] Starting parallel analysis of "${projectName}" by all 3 agents...`);
 
