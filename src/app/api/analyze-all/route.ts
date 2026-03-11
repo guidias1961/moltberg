@@ -3,6 +3,10 @@ import { runMoltbergAnalysis } from '@/lib/agents/moltberg';
 import { runBozworthAnalysis } from '@/lib/agents/bozworth';
 import { runCoxwellAnalysis } from '@/lib/agents/coxwell';
 
+export const runtime = 'edge';
+export const maxDuration = 60; // Set to max allowed
+
+
 /* ─── Agent Weights ─── */
 const WEIGHTS = {
     moltberg: 0.40,

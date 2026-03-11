@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { runMoltbergAnalysis } from '@/lib/agents/moltberg';
 
+export const runtime = 'edge';
+export const maxDuration = 60;
+
+
 export async function POST(req: NextRequest) {
     try {
         const { projectName, pitch, niche } = await req.json();
