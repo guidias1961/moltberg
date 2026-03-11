@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { runMoltbergAnalysis } from '@/lib/agents/moltberg';
+import { runBozworthAnalysis } from '@/lib/agents/bozworth';
+import { runCoxwellAnalysis } from '@/lib/agents/coxwell';
 
 /* ─── Agent Weights ─── */
 const WEIGHTS = {
@@ -7,7 +10,7 @@ const WEIGHTS = {
     coxwell: 0.30,
 };
 
-interface AgentAnalysis {
+export interface AgentAnalysis {
     feasibility: number;
     marketDisruption: number;
     narrativeStrength: number;
@@ -28,29 +31,11 @@ interface AgentResult {
     error?: string;
 }
 
-async function callAgent(
-    agentPath: string,
-    body: object,
-    baseUrl: string,
-): Promise<AgentResult> {
-    const agentName = agentPath.includes('boz') ? 'bozworth' : agentPath.includes('cox') ? 'coxwell' : 'moltberg';
+async function safeCall(agentName: string, fn: () => Promise<{ success: boolean; analysis?: AgentAnalysis; model?: string; error?: string }>): Promise<AgentResult> {
     try {
-        const response = await fetch(`${baseUrl}/api/${agentPath}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.analysis) {
-                return { agent: agentName, success: true, analysis: data.analysis, model: data.model };
-            }
-        }
-        const errorText = await response.text().catch(() => 'Unknown error');
-        return { agent: agentName, success: false, error: errorText.slice(0, 200) };
+        const result = await fn();
+        return { agent: agentName, ...result };
     } catch (err) {
-        console.error(`[TRIBUNAL] ${agentName} failed:`, err);
         return { agent: agentName, success: false, error: String(err) };
     }
 }
@@ -66,31 +51,21 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const body = { projectName, pitch, niche };
+        console.log(`[TRIBUNAL] Starting parallel analysis of "${projectName}" by all 3 agents (Direct Function Calls)...`);
 
-        // Determine base URL from request or environment
-        const origin = req.nextUrl.origin;
-        const baseUrl = origin !== 'http://localhost:3000' && origin !== 'http://:' ? origin : (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-
-        console.log(`[TRIBUNAL] Starting parallel analysis of "${projectName}" by all 3 agents...`);
-
-        // Call all 3 agents in parallel
-        const results = await Promise.allSettled([
-            callAgent('analyze', body, baseUrl),
-            callAgent('analyze-boz', body, baseUrl),
-            callAgent('analyze-cox', body, baseUrl),
+        // Call all 3 agents in parallel using imported library functions
+        const results = await Promise.all([
+            safeCall('moltberg', () => runMoltbergAnalysis(projectName, pitch, niche)),
+            safeCall('bozworth', () => runBozworthAnalysis(projectName, pitch, niche)),
+            safeCall('coxwell', () => runCoxwellAnalysis(projectName, pitch, niche))
         ]);
 
-        const agentResults: AgentResult[] = results.map((r) =>
-            r.status === 'fulfilled' ? r.value : { agent: 'unknown', success: false, error: 'Promise rejected' }
-        );
+        const agentResults: AgentResult[] = results;
 
-        // Map results to named agents
         const moltbergResult = agentResults.find(r => r.agent === 'moltberg');
         const bozworthResult = agentResults.find(r => r.agent === 'bozworth');
         const coxwellResult = agentResults.find(r => r.agent === 'coxwell');
 
-        // Calculate weighted average from successful agents
         const successfulAgents: { agent: string; analysis: AgentAnalysis; weight: number }[] = [];
         if (moltbergResult?.success && moltbergResult.analysis) {
             successfulAgents.push({ agent: 'moltberg', analysis: moltbergResult.analysis, weight: WEIGHTS.moltberg });
