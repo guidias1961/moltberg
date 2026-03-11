@@ -1,0 +1,400 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --lobster: #FF4500;
+  --matrix: #00FF41;
+  --terminal-dark: #0A0A0F;
+  --terminal-mid: #12121A;
+  --terminal-light: #1A1A2E;
+  --terminal-border: #2A2A3E;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--terminal-dark);
+  color: #E0E0E0;
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--terminal-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--lobster);
+}
+
+.custom-scroll::-webkit-scrollbar {
+  width: 3px;
+}
+
+/* ─── Data Stream Background ─── */
+.data-stream-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.data-stream-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 200%;
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 2px,
+      rgba(0, 255, 65, 0.012) 2px, rgba(0, 255, 65, 0.012) 4px);
+  animation: dataStreamScroll 15s linear infinite;
+}
+
+.data-stream-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(255, 69, 0, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(0, 255, 65, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(255, 69, 0, 0.03) 0%, transparent 50%);
+}
+
+@keyframes dataStreamScroll {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+/* ─── Scan Line ─── */
+.scan-line {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.06), transparent);
+  animation: scanLineMove 4s linear infinite;
+}
+
+@keyframes scanLineMove {
+  0% {
+    top: -2px;
+  }
+
+  100% {
+    top: 100vh;
+  }
+}
+
+/* ─── Glitch ─── */
+.glitch-hover {
+  position: relative;
+  transition: all 0.1s ease;
+}
+
+.glitch-hover:hover {
+  animation: glitchFx 0.3s ease-in-out;
+  text-shadow: 2px 0 rgba(255, 69, 0, 0.7), -2px 0 rgba(0, 255, 65, 0.7);
+}
+
+@keyframes glitchFx {
+  0% {
+    transform: translate(0);
+  }
+
+  10% {
+    transform: translate(-3px, 2px);
+  }
+
+  20% {
+    transform: translate(3px, -2px);
+  }
+
+  30% {
+    transform: translate(-2px, -1px);
+  }
+
+  40% {
+    transform: translate(2px, 2px);
+  }
+
+  50% {
+    transform: translate(-3px, 1px);
+  }
+
+  60% {
+    transform: translate(3px, -1px);
+  }
+
+  70% {
+    transform: translate(-1px, 2px);
+  }
+
+  80% {
+    transform: translate(1px, -3px);
+  }
+
+  90% {
+    transform: translate(-2px, -1px);
+  }
+
+  100% {
+    transform: translate(0);
+  }
+}
+
+/* ─── Glass Card ─── */
+.glass-card {
+  background: rgba(18, 18, 26, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(42, 42, 62, 0.6);
+  border-radius: 16px;
+}
+
+.glass-card-hover:hover {
+  border-color: rgba(255, 69, 0, 0.4);
+  box-shadow: 0 0 20px rgba(255, 69, 0, 0.1), inset 0 0 20px rgba(255, 69, 0, 0.03);
+}
+
+/* ─── Glows ─── */
+.matrix-glow {
+  text-shadow: 0 0 10px rgba(0, 255, 65, 0.5), 0 0 20px rgba(0, 255, 65, 0.3);
+}
+
+.lobster-glow {
+  text-shadow: 0 0 10px rgba(255, 69, 0, 0.5), 0 0 20px rgba(255, 69, 0, 0.3);
+}
+
+/* ─── Typewriter Cursor ─── */
+.typewriter-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  background-color: var(--matrix);
+  margin-left: 2px;
+  animation: blink 0.7s steps(1) infinite;
+  vertical-align: text-bottom;
+}
+
+@keyframes blink {
+
+  0%,
+  50% {
+    opacity: 1;
+  }
+
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ─── Analysis Overlay ─── */
+.analysis-overlay {
+  background: repeating-linear-gradient(0deg, transparent, transparent 1px,
+      rgba(0, 255, 65, 0.025) 1px, rgba(0, 255, 65, 0.025) 2px);
+  animation: analysisPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes analysisPulse {
+  0% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+
+  100% {
+    opacity: 0.3;
+  }
+}
+
+/* ─── Countdown Digit ─── */
+.countdown-digit {
+  background: linear-gradient(180deg, rgba(18, 18, 26, 0.9) 0%, rgba(10, 10, 15, 0.95) 100%);
+  border: 1px solid rgba(0, 255, 65, 0.2);
+  box-shadow: 0 0 15px rgba(0, 255, 65, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ─── Terminal Input ─── */
+.terminal-input {
+  background: rgba(10, 10, 15, 0.8);
+  border: 1px solid var(--terminal-border);
+  color: #E0E0E0;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.3s ease;
+}
+
+.terminal-input:focus {
+  outline: none;
+  border-color: var(--matrix);
+  box-shadow: 0 0 15px rgba(0, 255, 65, 0.15);
+}
+
+.terminal-input::placeholder {
+  color: rgba(224, 224, 224, 0.3);
+}
+
+/* ─── Submit Button ─── */
+.submit-btn {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 69, 0, 0.2), rgba(255, 69, 0, 0.1));
+  border: 1px solid rgba(255, 69, 0, 0.5);
+  color: var(--lobster);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 14px 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+  background: linear-gradient(135deg, rgba(255, 69, 0, 0.3), rgba(255, 69, 0, 0.15));
+  border-color: var(--lobster);
+  box-shadow: 0 0 20px rgba(255, 69, 0, 0.3), 0 0 40px rgba(255, 69, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+}
+
+.submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 69, 0, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.submit-btn:hover::before {
+  left: 100%;
+}
+
+/* ─── START ANALYSIS Button (Intro) ─── */
+.start-analysis-btn {
+  position: relative;
+  background: transparent;
+  border: 2px solid var(--lobster);
+  color: var(--lobster);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  padding: 18px 48px;
+  border-radius: 4px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+
+.start-analysis-btn:hover {
+  background: rgba(255, 69, 0, 0.1);
+  box-shadow:
+    0 0 30px rgba(255, 69, 0, 0.4),
+    0 0 60px rgba(255, 69, 0, 0.15),
+    inset 0 0 30px rgba(255, 69, 0, 0.05);
+  transform: translateY(-2px);
+  text-shadow: 0 0 10px rgba(255, 69, 0, 0.6);
+  animation: glitchFx 0.3s ease-in-out;
+}
+
+.start-analysis-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px,
+      rgba(255, 69, 0, 0.03) 2px, rgba(255, 69, 0, 0.03) 4px);
+  pointer-events: none;
+  animation: analysisPulse 2s ease-in-out infinite;
+}
+
+/* ─── Leaderboard Rank Indicators ─── */
+.rank-gold {
+  border-left: 3px solid #FFD700;
+}
+
+.rank-silver {
+  border-left: 3px solid #C0C0C0;
+}
+
+.rank-bronze {
+  border-left: 3px solid #CD7F32;
+}
+
+/* ─── Glitch-Tech Page Transition ─── */
+@keyframes pageGlitchIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-5px);
+    filter: blur(4px);
+  }
+
+  20% {
+    opacity: 0.5;
+    transform: translateX(3px);
+    filter: blur(2px);
+  }
+
+  40% {
+    opacity: 0.8;
+    transform: translateX(-2px);
+    filter: blur(1px);
+  }
+
+  60% {
+    opacity: 0.9;
+    transform: translateX(1px);
+    filter: blur(0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+}
+
+.glitch-enter {
+  animation: pageGlitchIn 0.5s ease-out both;
+}
