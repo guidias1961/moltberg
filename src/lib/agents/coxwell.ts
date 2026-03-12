@@ -57,7 +57,7 @@ async function sleep(ms: number) {
 async function callCerebrasWithRetry(
     userPrompt: string,
     maxRetries: number = 1,
-): Promise<{ text: string; model: string } | null> {
+): Promise<{ text: string; model: string; error?: string } | null> {
     for (const model of MODELS) {
         for (let attempt = 0; attempt < maxRetries; attempt++) {
             try {
@@ -88,14 +88,15 @@ async function callCerebrasWithRetry(
                     const text = data?.choices?.[0]?.message?.content;
                     if (text) return { text, model };
                 } else {
-                    break;
+                    const errText = await response.text();
+                    return { text: '', model, error: `Cerebras HTTP ${response.status}: ${errText}` };
                 }
-            } catch (err) {
-                break;
+            } catch (err: any) {
+                return { text: '', model, error: `Cerebras Fetch Error: ${err.message}` };
             }
         }
     }
-    return null;
+    return { text: '', model: '', error: 'All Cerebras models failed' };
 }
 
 export async function runCoxwellAnalysis(projectName: string, pitch: string, niche: string): Promise<{ success: boolean; analysis?: AgentAnalysis; model?: string; error?: string }> {
@@ -113,8 +114,8 @@ Apply the ${niche} weight multipliers to your base scores. Return your evaluatio
 
     const result = await callCerebrasWithRetry(userPrompt);
 
-    if (!result) {
-        return { success: false, error: 'All Cerebras models unavailable' };
+    if (!result || result.error) {
+        return { success: false, error: result?.error || 'All Cerebras models unavailable' };
     }
 
     let cleaned = result.text.trim();

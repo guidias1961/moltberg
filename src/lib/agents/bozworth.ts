@@ -57,7 +57,7 @@ async function sleep(ms: number) {
 async function callGroqWithRetry(
     userPrompt: string,
     maxRetries: number = 1,
-): Promise<{ text: string; model: string } | null> {
+): Promise<{ text: string; model: string; error?: string } | null> {
     for (const model of MODELS) {
         for (let attempt = 0; attempt < maxRetries; attempt++) {
             try {
@@ -88,14 +88,15 @@ async function callGroqWithRetry(
                     const text = data?.choices?.[0]?.message?.content;
                     if (text) return { text, model };
                 } else {
-                    break;
+                    const errText = await response.text();
+                    return { text: '', model, error: `Groq HTTP ${response.status}: ${errText}` };
                 }
-            } catch (err) {
-                break;
+            } catch (err: any) {
+                return { text: '', model, error: `Groq Fetch Error: ${err.message}` };
             }
         }
     }
-    return null;
+    return { text: '', model: '', error: 'All Groq models failed' };
 }
 
 export async function runBozworthAnalysis(projectName: string, pitch: string, niche: string): Promise<{ success: boolean; analysis?: AgentAnalysis; model?: string; error?: string }> {
@@ -113,8 +114,8 @@ Apply the ${niche} weight multipliers to your base scores. Return your evaluatio
 
     const result = await callGroqWithRetry(userPrompt);
 
-    if (!result) {
-        return { success: false, error: 'All Groq models unavailable' };
+    if (!result || result.error) {
+        return { success: false, error: result?.error || 'All Groq models unavailable' };
     }
 
     let cleaned = result.text.trim();

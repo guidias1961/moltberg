@@ -58,7 +58,7 @@ async function sleep(ms: number) {
 async function callGeminiWithRetry(
     userPrompt: string,
     maxRetries: number = 1,
-): Promise<{ text: string; model: string } | null> {
+): Promise<{ text: string; model: string; error?: string } | null> {
     for (const model of MODELS) {
         for (let attempt = 0; attempt < maxRetries; attempt++) {
             try {
@@ -91,14 +91,15 @@ async function callGeminiWithRetry(
                         return { text, model };
                     }
                 } else {
-                    break;
+                    const errText = await response.text();
+                    return { text: '', model, error: `Gemini HTTP ${response.status}: ${errText}` };
                 }
-            } catch (err) {
-                break;
+            } catch (err: any) {
+                return { text: '', model, error: `Gemini Fetch Error: ${err.message}` };
             }
         }
     }
-    return null;
+    return { text: '', model: '', error: 'All Gemini models failed' };
 }
 
 export async function runMoltbergAnalysis(projectName: string, pitch: string, niche: string): Promise<{ success: boolean; analysis?: AgentAnalysis; model?: string; error?: string }> {
@@ -116,8 +117,8 @@ Apply the ${niche} weight multipliers to your base scores. Return your evaluatio
 
     const result = await callGeminiWithRetry(userPrompt);
 
-    if (!result) {
-        return { success: false, error: 'All Gemini models rate-limited or unavailable' };
+    if (!result || result.error) {
+        return { success: false, error: result?.error || 'All Gemini models rate-limited or unavailable' };
     }
 
     let cleaned = result.text.trim();
