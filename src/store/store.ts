@@ -90,8 +90,10 @@ interface MoltbergStore {
 
     /* ─ Wallet ─ */
     walletAddress: string | null;
-    connectWallet: () => void;
+    walletError: string | null;
+    connectWallet: () => Promise<void>;
     disconnectWallet: () => void;
+    setWalletAddress: (addr: string | null) => void;
 
     /* ─ Analysis ─ */
     isAnalyzing: boolean;
@@ -428,8 +430,62 @@ export const useMoltbergStore = create<MoltbergStore>((set, get) => ({
     countdownTarget: getCountdownTarget(),
 
     walletAddress: null,
-    connectWallet: () => set({ walletAddress: generateWallet() }),
-    disconnectWallet: () => set({ walletAddress: null }),
+    walletError: null,
+    setWalletAddress: (addr) => set({ walletAddress: addr }),
+    connectWallet: async () => {
+        if (typeof window === 'undefined') return;
+        const anyWindow = window as any;
+        if (!anyWindow.ethereum) {
+            set({ walletError: 'EVM Wallet not detected. Please install MetaMask or Coinbase Wallet.' });
+            return;
+        }
+
+        try {
+            set({ walletError: null });
+            const accounts = await anyWindow.ethereum.request({ method: 'eth_requestAccounts' });
+            const address = accounts[0];
+
+            // Request switch to Base Chain (Mainnet)
+            const BASE_CHAIN_ID = '0x2105'; // 8453 in hex
+            try {
+                await anyWindow.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: BASE_CHAIN_ID }],
+                });
+            } catch (switchError: any) {
+                // If chain hasn't been added, add it
+                if (switchError.code === 4902) {
+                    await anyWindow.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: BASE_CHAIN_ID,
+                            chainName: 'Base',
+                            nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                            rpcUrls: ['https://mainnet.base.org'],
+                            blockExplorerUrls: ['https://basescan.org'],
+                        }],
+                    });
+                } else {
+                    throw switchError;
+                }
+            }
+
+            set({ walletAddress: address });
+
+            // Listeners
+            anyWindow.ethereum.on('accountsChanged', (newAccounts: string[]) => {
+                set({ walletAddress: newAccounts.length > 0 ? newAccounts[0] : null });
+            });
+            anyWindow.ethereum.on('chainChanged', () => {
+                window.location.reload();
+            });
+
+        } catch (err: any) {
+            console.error('Wallet connection error:', err);
+            set({ walletError: err.message || 'Failed to connect wallet.' });
+        }
+    },
+    disconnectWallet: () => set({ walletAddress: null, walletError: null }),
 
     isAnalyzing: false,
     analysisProgress: 0,

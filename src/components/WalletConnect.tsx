@@ -5,13 +5,24 @@ import { motion } from 'framer-motion';
 import { useMoltbergStore } from '@/store/store';
 
 export default function WalletConnect() {
-    const { walletAddress, feePool, connectWallet, disconnectWallet, phase, tickFeePool } = useMoltbergStore();
+    const { walletAddress, walletError, feePool, connectWallet, disconnectWallet, phase, tickFeePool, setWalletAddress } = useMoltbergStore();
 
     // Live-ticker for fee pool — ticks every 3s
     useEffect(() => {
         const id = setInterval(tickFeePool, 3000);
         return () => clearInterval(id);
     }, [tickFeePool]);
+
+    // Cleanup listeners or initial check
+    useEffect(() => {
+        if (typeof window !== 'undefined' && (window as any).ethereum) {
+            (window as any).ethereum.request({ method: 'eth_accounts' })
+                .then((accounts: string[]) => {
+                    if (accounts.length > 0) setWalletAddress(accounts[0]);
+                })
+                .catch(console.error);
+        }
+    }, [setWalletAddress]);
 
 
 
@@ -90,14 +101,23 @@ export default function WalletConnect() {
                         </button>
                     </div>
                 ) : (
-                    <button
-                        onClick={connectWallet}
-                        className="submit-btn w-full text-[11px] !py-3 !border-matrix/50 !text-matrix
-              hover:!border-matrix hover:!bg-matrix/10
-              hover:!shadow-[0_0_20px_rgba(0,255,65,0.2)]"
-                    >
-                        ◈ Connect Wallet
-                    </button>
+                    <div className="space-y-3">
+                        {walletError && (
+                            <div className="p-2 rounded bg-lobster/10 border border-lobster/30">
+                                <p className="font-mono text-[9px] text-lobster text-center leading-tight">
+                                    {walletError}
+                                </p>
+                            </div>
+                        )}
+                        <button
+                            onClick={connectWallet}
+                            className="submit-btn w-full text-[11px] !py-3 !border-matrix/50 !text-matrix
+                  hover:!border-matrix hover:!bg-matrix/10
+                  hover:!shadow-[0_0_20px_rgba(0,255,65,0.2)]"
+                        >
+                            ◈ Connect Wallet
+                        </button>
+                    </div>
                 )}
             </div>
         </motion.div>
