@@ -59,11 +59,13 @@ async function callGeminiWithRetry(
     userPrompt: string,
     maxRetries: number = 1,
 ): Promise<{ text: string; model: string; error?: string } | null> {
+    let lastError = '';
     for (const model of MODELS) {
         for (let attempt = 0; attempt < maxRetries; attempt++) {
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout for edge runtime
+                const timeoutId = setTimeout(() => controller.abort(), 25000);
+
                 const response = await fetch(getGeminiUrl(model), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -72,9 +74,12 @@ async function callGeminiWithRetry(
                         contents: [
                             {
                                 role: 'user',
-                                parts: [{ text: SYSTEM_PROMPT + '\n\n' + userPrompt }],
+                                parts: [{ text: userPrompt }],
                             },
                         ],
+                        system_instruction: {
+                            parts: [{ text: SYSTEM_PROMPT }]
+                        },
                         generationConfig: {
                             temperature: 0.7,
                             topP: 0.9,
@@ -87,19 +92,21 @@ async function callGeminiWithRetry(
                 if (response.ok) {
                     const data = await response.json();
                     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (text) {
-                        return { text, model };
-                    }
+                    if (text) return { text, model };
                 } else {
                     const errText = await response.text();
-                    return { text: '', model, error: `Gemini HTTP ${response.status}: ${errText}` };
+                    lastError = `Gemini HTTP ${response.status} (${model}): ${errText}`;
+                    console.error(`[MOLTBERG] ${lastError}`);
+                    break; // Try next model
                 }
             } catch (err: any) {
-                return { text: '', model, error: `Gemini Fetch Error: ${err.message}` };
+                lastError = `Gemini Fetch Error (${model}): ${err.message}`;
+                console.error(`[MOLTBERG] ${lastError}`);
+                break; // Try next model
             }
         }
     }
-    return { text: '', model: '', error: 'All Gemini models failed' };
+    return { text: '', model: '', error: lastError || 'All Gemini models failed' };
 }
 
 export async function runMoltbergAnalysis(projectName: string, pitch: string, niche: string): Promise<{ success: boolean; analysis?: AgentAnalysis; model?: string; error?: string }> {
