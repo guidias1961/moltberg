@@ -133,7 +133,7 @@ async function callGroq(messages: { role: string; content: string }[]): Promise<
 
 async function callCerebras(messages: { role: string; content: string }[]): Promise<string | null> {
     if (!CEREBRAS_API_KEY) return null;
-    const models = ['llama-3.3-70b', 'llama3.1-70b', 'llama3.1-8b'];
+    const models = ['llama3.1-70b', 'llama3.1-8b'];
     for (const model of models) {
         try {
             const response = await fetch('https://api.cerebras.ai/v1/chat/completions', {
@@ -165,9 +165,7 @@ async function callCerebras(messages: { role: string; content: string }[]): Prom
 
 // MOLTBERG tries Gemini first, falls back to Groq for resilience
 async function callMoltberg(messages: { role: string; content: string }[]): Promise<string | null> {
-    const geminiResult = await callGemini(messages);
-    if (geminiResult) return geminiResult;
-    console.warn('[CHAT/MOLTBERG] Gemini unavailable, falling back to Groq...');
+    // Use Groq for Moltberg to avoid Gemini rate limits
     return callGroq(messages);
 }
 
