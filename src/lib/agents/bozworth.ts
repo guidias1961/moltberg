@@ -57,17 +57,20 @@ async function sleep(ms: number) {
 
 async function callGroqWithRetry(
     userPrompt: string,
-    maxRetries: number = 3,
+    maxRetries: number = 1,
 ): Promise<{ text: string; model: string } | null> {
     for (const model of MODELS) {
         for (let attempt = 0; attempt < maxRetries; attempt++) {
             try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second strict timeout
                 const response = await fetch(GROQ_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${GROQ_API_KEY}`,
                     },
+                    signal: controller.signal,
                     body: JSON.stringify({
                         model,
                         messages: [
@@ -79,20 +82,17 @@ async function callGroqWithRetry(
                         max_tokens: 1024,
                     }),
                 });
+                clearTimeout(timeoutId);
 
                 if (response.ok) {
                     const data = await response.json();
                     const text = data?.choices?.[0]?.message?.content;
                     if (text) return { text, model };
-                } else if (response.status === 429) {
-                    const waitTime = Math.pow(2, attempt) * 2000 + Math.random() * 1000;
-                    await sleep(waitTime);
-                    continue;
                 } else {
                     break;
                 }
             } catch (err) {
-                if (attempt < maxRetries - 1) await sleep(1000 * (attempt + 1));
+                break;
             }
         }
     }

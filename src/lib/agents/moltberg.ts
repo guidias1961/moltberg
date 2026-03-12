@@ -59,16 +59,17 @@ async function sleep(ms: number) {
 
 async function callGeminiWithRetry(
     userPrompt: string,
-    maxRetries: number = 3,
+    maxRetries: number = 1,
 ): Promise<{ text: string; model: string } | null> {
     for (const model of MODELS) {
         for (let attempt = 0; attempt < maxRetries; attempt++) {
             try {
-                console.log(`[MOLTBERG] Trying ${model}, attempt ${attempt + 1}/${maxRetries}`);
-
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second strict timeout
                 const response = await fetch(getGeminiUrl(model), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    signal: controller.signal,
                     body: JSON.stringify({
                         contents: [
                             {
@@ -83,6 +84,7 @@ async function callGeminiWithRetry(
                         },
                     }),
                 });
+                clearTimeout(timeoutId);
 
                 if (response.ok) {
                     const data = await response.json();
@@ -90,17 +92,11 @@ async function callGeminiWithRetry(
                     if (text) {
                         return { text, model };
                     }
-                } else if (response.status === 429) {
-                    const waitTime = Math.pow(2, attempt) * 2000 + Math.random() * 1000;
-                    await sleep(waitTime);
-                    continue;
                 } else {
                     break;
                 }
             } catch (err) {
-                if (attempt < maxRetries - 1) {
-                    await sleep(1000 * (attempt + 1));
-                }
+                break;
             }
         }
     }
