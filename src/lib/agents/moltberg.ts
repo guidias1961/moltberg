@@ -38,21 +38,17 @@ SCORING RULES:
 
 You MUST return ONLY valid JSON (no markdown fences, no extra text):
 {
-  "feasibility": <number>,
-  "marketDisruption": <number>,
-  "narrativeStrength": <number>,
-  "totalScore": <number>,
+  "feasibility": number,
+  "marketDisruption": number,
+  "narrativeStrength": number,
+  "totalScore": number,
   "rationale": {
-    "feasibility": "<2-4 sentences>",
-    "marketDisruption": "<2-4 sentences>",
-    "narrativeStrength": "<2-4 sentences>",
-    "verdict": "<3-5 sentences starting with VERDICT: ELITE/COMPETITIVE/VIABLE/WEAK/REJECTED>"
-  }
+    "feasibility": "...",
+    "marketDisruption": "...",
+    "narrativeStrength": "..."
+  },
+  "verdict": "REJECTED | MONITOR | INVEST"
 }`;
-
-async function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 async function callGeminiWithRetry(
     userPrompt: string,
@@ -96,12 +92,12 @@ async function callGeminiWithRetry(
                     const errText = await response.text();
                     errors.push(`${model}: HTTP ${response.status} - ${errText.slice(0, 100)}`);
                     console.error(`[MOLTBERG] ${model}: HTTP ${response.status} - ${errText}`);
-                    break; // Try next model
+                    break;
                 }
             } catch (err: any) {
                 errors.push(`${model}: Fetch Error - ${err.message}`);
                 console.error(`[MOLTBERG] ${model}: Fetch Error - ${err.message}`);
-                break; // Try next model
+                break;
             }
         }
     }
@@ -109,47 +105,30 @@ async function callGeminiWithRetry(
 }
 
 export async function runMoltbergAnalysis(projectName: string, pitch: string, niche: string): Promise<{ success: boolean; analysis?: AgentAnalysis; model?: string; error?: string }> {
-    if (!process.env.GEMINI_API_KEY) {
-        return { success: false, error: 'GEMINI_API_KEY not configured' };
-    }
-
-    const userPrompt = `ANALYZE THIS PROJECT SUBMISSION:
-
-PROJECT NAME: ${projectName}
-NICHE: ${niche}
-PITCH: "${pitch}"
-
-Apply the ${niche} weight multipliers to your base scores. Return your evaluation as valid JSON only.`;
-
-    const result = await callGeminiWithRetry(userPrompt);
-
-    if (!result || result.error) {
-        return { success: false, error: result?.error || 'All Gemini models rate-limited or unavailable' };
-    }
-
-    let cleaned = result.text.trim();
-    if (cleaned.startsWith('\`\`\`')) {
-        cleaned = cleaned.replace(/^\`\`\`(?:json)?\n?/, '').replace(/\n?\`\`\`$/, '');
-    }
-
     try {
-        const parsed = JSON.parse(cleaned);
-        const analysis = {
-            feasibility: Math.min(33.33, Math.max(0, Number(parsed.feasibility) || 0)),
-            marketDisruption: Math.min(33.33, Math.max(0, Number(parsed.marketDisruption) || 0)),
-            narrativeStrength: Math.min(33.34, Math.max(0, Number(parsed.narrativeStrength) || 0)),
-            totalScore: 0,
-            rationale: {
-                feasibility: String(parsed.rationale?.feasibility || 'Analysis unavailable.'),
-                marketDisruption: String(parsed.rationale?.marketDisruption || 'Analysis unavailable.'),
-                narrativeStrength: String(parsed.rationale?.narrativeStrength || 'Analysis unavailable.'),
-                verdict: String(parsed.rationale?.verdict || 'Verdict unavailable.'),
-            },
-        };
+        const prompt = `Project Name: ${projectName}\nNiche: ${niche}\nPitch: ${pitch}`;
+        const result = await callGeminiWithRetry(prompt);
 
-        analysis.totalScore = Math.round((analysis.feasibility + analysis.marketDisruption + analysis.narrativeStrength) * 100) / 100;
-        return { success: true, analysis, model: result.model };
-    } catch {
-        return { success: false, error: 'Invalid JSON from agent' };
+        if (!result || !result.text) {
+            return { success: false, error: result?.error || "Gemini agents are busy or offline" };
+        }
+
+        // Clean JSON formatting
+        let cleanJson = result.text.replace(/```json\n?/, '').replace(/```\n?/, '').trim();
+
+        try {
+            const analysis = JSON.parse(cleanJson);
+            return {
+                success: true,
+                analysis,
+                model: result.model
+            };
+        } catch (parseError) {
+            console.error('[MOLTBERG] JSON Parse error:', parseError, 'Raw text:', result.text);
+            return { success: false, error: "Failed to parse agent response" };
+        }
+    } catch (error: any) {
+        console.error('[MOLTBERG] Analysis error:', error);
+        return { success: false, error: error.message };
     }
 }

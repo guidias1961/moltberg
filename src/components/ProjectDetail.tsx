@@ -181,14 +181,9 @@ export default function ProjectDetail() {
                                                     <div className="flex flex-col gap-1 mt-1">
                                                         <p className="font-mono text-[10px] text-gray-600">Agent unavailable</p>
                                                         {ab.error && (
-                                                            <div className="mt-2 p-2 bg-red-500/15 border border-red-500/40 rounded animate-pulse">
-                                                                <p className="font-mono text-[8px] text-red-500 uppercase font-bold mb-1">
-                                                                    Tribunal API Error:
-                                                                </p>
-                                                                <p className="font-mono text-[9px] text-red-300 break-all">
-                                                                    &quot;{ab.error}&quot;
-                                                                </p>
-                                                            </div>
+                                                            <p className="font-mono text-[8px] text-gray-500 mt-2 opacity-50 hover:opacity-100 transition-opacity">
+                                                                Detail: {ab.error.slice(0, 50)}...
+                                                            </p>
                                                         )}
                                                     </div>
                                                 )}
