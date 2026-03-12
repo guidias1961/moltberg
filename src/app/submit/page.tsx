@@ -50,22 +50,15 @@ export default function SubmitPage() {
         const pitchText = pitch.trim();
         const niche = selectedNiche;
 
-        // Start progress animation alongside the API call
-        let progress = 0;
-        let apiDone = false;
-        const progressInterval = setInterval(() => {
-            if (apiDone) return;
-            // Slow down near the end to wait for API
-            const maxBeforeApi = 85;
-            if (progress < maxBeforeApi) {
-                progress += Math.random() * 6 + 2;
-                progress = Math.min(progress, maxBeforeApi);
-                setAnalysisProgress(Math.round(progress));
-            }
-        }, 300);
+        let currentProgress = 0;
+        let progressInterval = setInterval(() => {
+            if (currentProgress >= 90) return;
+            currentProgress += 5;
+            setAnalysisProgress(currentProgress);
+        }, 1000);
 
+        let apiDone = false;
         try {
-            // Call real Gemini-powered agent
             const response = await fetch('/api/analyze-all', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -78,21 +71,26 @@ export default function SubmitPage() {
             if (response.ok) {
                 const data = await response.json();
                 if (data.success && data.analysis) {
-                    // Animate progress to 100%
                     setAnalysisProgress(95);
                     await new Promise(r => setTimeout(r, 300));
                     setAnalysisProgress(100);
                     await new Promise(r => setTimeout(r, 400));
 
-                    await addProjectFromAI(name, pitchText, niche, 'human', data.analysis, data.breakdown);
-                    setLastScored(name);
-                    setAnalyzing(false);
-                    setAnalysisComplete(true);
-                    setProjectName('');
-                    setPitch('');
-                    setSelectedNiche(null);
-                    setTimeout(() => setAnalysisComplete(false), 8000);
-                    return;
+                    try {
+                        await addProjectFromAI(name, pitchText, niche, 'human', data.analysis, data.breakdown);
+                        setLastScored(name);
+                        setAnalyzing(false);
+                        setAnalysisComplete(true);
+                        setProjectName('');
+                        setPitch('');
+                        setSelectedNiche(null);
+                        setTimeout(() => setAnalysisComplete(false), 8000);
+                        return;
+                    } catch (persistErr: any) {
+                        setAiError(`Persistence Error: ${persistErr?.message || 'Check Redis/KV config'}`);
+                        setAnalyzing(false);
+                        return;
+                    }
                 }
             }
 
@@ -101,14 +99,19 @@ export default function SubmitPage() {
             setAiError('Agent offline — using deterministic fallback');
             setAnalysisProgress(100);
             await new Promise(r => setTimeout(r, 400));
-            await addProject(name, pitchText, niche, 'human');
-            setLastScored(name);
-            setAnalyzing(false);
-            setAnalysisComplete(true);
-            setProjectName('');
-            setPitch('');
-            setSelectedNiche(null);
-            setTimeout(() => setAnalysisComplete(false), 8000);
+            try {
+                await addProject(name, pitchText, niche, 'human');
+                setLastScored(name);
+                setAnalyzing(false);
+                setAnalysisComplete(true);
+                setProjectName('');
+                setPitch('');
+                setSelectedNiche(null);
+                setTimeout(() => setAnalysisComplete(false), 8000);
+            } catch (persistErr: any) {
+                setAiError(`Persistence Error: ${persistErr?.message || 'Check Redis/KV config'}`);
+                setAnalyzing(false);
+            }
         } catch (err) {
             apiDone = true;
             clearInterval(progressInterval);
@@ -116,14 +119,19 @@ export default function SubmitPage() {
             setAiError('Agent offline — using deterministic fallback');
             setAnalysisProgress(100);
             await new Promise(r => setTimeout(r, 400));
-            await addProject(name, pitchText, niche, 'human');
-            setLastScored(name);
-            setAnalyzing(false);
-            setAnalysisComplete(true);
-            setProjectName('');
-            setPitch('');
-            setSelectedNiche(null);
-            setTimeout(() => setAnalysisComplete(false), 8000);
+            try {
+                await addProject(name, pitchText, niche, 'human');
+                setLastScored(name);
+                setAnalyzing(false);
+                setAnalysisComplete(true);
+                setProjectName('');
+                setPitch('');
+                setSelectedNiche(null);
+                setTimeout(() => setAnalysisComplete(false), 8000);
+            } catch (persistErr: any) {
+                setAiError(`Persistence Error: ${persistErr?.message || 'Check Redis/KV config'}`);
+                setAnalyzing(false);
+            }
         }
     }, [projectName, pitch, selectedNiche, addProject, addProjectFromAI, setAnalyzing, setAnalysisProgress]);
 

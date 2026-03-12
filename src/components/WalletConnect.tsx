@@ -5,13 +5,12 @@ import { motion } from 'framer-motion';
 import { useMoltbergStore } from '@/store/store';
 
 export default function WalletConnect() {
-    const { walletAddress, walletError, feePool, connectWallet, disconnectWallet, phase, tickFeePool, setWalletAddress } = useMoltbergStore();
+    const { walletAddress, walletError, feePool, connectWallet, disconnectWallet, phase, setWalletAddress } = useMoltbergStore();
 
-    // Live-ticker for fee pool — ticks every 3s
+    // Live-ticker removed to only show real activity
     useEffect(() => {
-        const id = setInterval(tickFeePool, 3000);
-        return () => clearInterval(id);
-    }, [tickFeePool]);
+        // Only fetch or listen if needed, but no fake ticks
+    }, []);
 
     // Cleanup listeners or initial check
     useEffect(() => {

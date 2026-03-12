@@ -84,9 +84,8 @@ interface MoltbergStore {
     }, breakdown?: AgentBreakdown[]) => Promise<void>;
     selectProject: (project: Project | null) => void;
 
-    /* ─ Fee Pool (live ticker) ─ */
+    /* ─ Fee Pool ─ */
     feePool: number;
-    tickFeePool: () => void;
 
     /* ─ Countdown ─ */
     countdownTarget: number;
@@ -389,15 +388,22 @@ export const useMoltbergStore = create<MoltbergStore>((set, get) => ({
 
         try {
             // Persist globally
-            await fetch('/api/projects', {
+            const res = await fetch('/api/projects', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(proj),
             });
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({ error: 'Unknown server error' }));
+                throw new Error(errorData.error || `Server responded with ${res.status}`);
+            }
+
             // Update local state by re-fetching or optimistic update
             await get().fetchProjects();
         } catch (error) {
             console.error('Failed to persist project:', error);
+            throw error; // Re-throw to let the UI handle it
         }
     },
 
@@ -424,25 +430,26 @@ export const useMoltbergStore = create<MoltbergStore>((set, get) => ({
 
         try {
             // Persist globally
-            await fetch('/api/projects', {
+            const res = await fetch('/api/projects', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(proj),
             });
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({ error: 'Unknown server error' }));
+                throw new Error(errorData.error || `Server responded with ${res.status}`);
+            }
+
             // Update local state
             await get().fetchProjects();
         } catch (error) {
             console.error('Failed to persist project:', error);
+            throw error; // Re-throw to let the UI handle it
         }
     },
 
     feePool: 0,
-    tickFeePool: () => {
-        set((s) => {
-            const delta = (Math.random() - 0.35) * 12.5;
-            return { feePool: Math.round((s.feePool + delta) * 100) / 100 };
-        });
-    },
 
     countdownTarget: getCountdownTarget(),
 
