@@ -63,12 +63,12 @@ export default function WalletConnect() {
                 {/* Networks */}
                 <div className="flex gap-2 mb-4">
                     <div className="flex-1 p-2 rounded-lg bg-terminal-dark/30 border border-terminal-border/50 text-center">
-                        <p className="font-mono text-[9px] text-gray-600 mb-0.5">Network</p>
-                        <p className="font-mono text-[11px] text-blue-400">Base</p>
+                        <p className="font-mono text-[9px] text-gray-600 mb-0.5">Primary Network</p>
+                        <p className="font-mono text-[11px] text-blue-400">Base Chain (L2)</p>
                     </div>
                     <div className="flex-1 p-2 rounded-lg bg-terminal-dark/30 border border-terminal-border/50 text-center">
-                        <p className="font-mono text-[9px] text-gray-600 mb-0.5">Alt</p>
-                        <p className="font-mono text-[11px] text-purple-400">Solana</p>
+                        <p className="font-mono text-[9px] text-gray-600 mb-0.5">Asset Type</p>
+                        <p className="font-mono text-[11px] text-matrix">ETH</p>
                     </div>
                 </div>
 
