@@ -9,12 +9,17 @@ import Navigation from '@/components/Navigation';
 import ProjectDetail from '@/components/ProjectDetail';
 import AgentChat from '@/components/AgentChat';
 import Link from 'next/link';
+import { useEffect } from 'react';
 import { useMoltbergStore } from '@/store/store';
 
 const DataStream = dynamic(() => import('@/components/DataStream'), { ssr: false });
 
 export default function Home() {
-    const { phase, projects, feePool } = useMoltbergStore();
+    const { phase, projects, feePool, fetchProjects } = useMoltbergStore();
+
+    useEffect(() => {
+        fetchProjects();
+    }, [fetchProjects]);
 
     const top3 = projects.slice(0, 3);
     const totalScores = projects.reduce((sum, p) => sum + p.totalScore, 0);

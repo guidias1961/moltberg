@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { runMoltbergAnalysis } from '@/lib/agents/moltberg';
 import { runBozworthAnalysis } from '@/lib/agents/bozworth';
 import { runCoxwellAnalysis } from '@/lib/agents/coxwell';
+import { saveProject, Project } from '@/lib/db';
 
 export const maxDuration = 30;
 
@@ -59,9 +60,37 @@ export async function POST(req: NextRequest) {
         });
 
         const finalScore = Math.round((weightedFeasibility + weightedMarket + weightedNarrative) * 100) / 100;
+        const primaryRationale = successfulAgents.sort((a, b) => (WEIGHTS[b.agent as keyof typeof WEIGHTS] || 0) - (WEIGHTS[a.agent as keyof typeof WEIGHTS] || 0))[0].analysis.rationale;
 
-        // NOTE: In a production environment with a database, we would persist the project here.
-        // For this demo, we return the signed result which the agent can then verify.
+        // Persist to Global Store
+        const project: Project = {
+            id: `p-agent-${Date.now()}`,
+            name: projectName,
+            pitch,
+            niche,
+            scores: {
+                feasibility: Math.round(weightedFeasibility * 100) / 100,
+                marketDisruption: Math.round(weightedMarket * 100) / 100,
+                narrativeStrength: Math.round(weightedNarrative * 100) / 100,
+            },
+            totalScore: finalScore,
+            rationale: primaryRationale,
+            aiPowered: true,
+            timestamp: Date.now(),
+            submitter: walletAddress,
+            submissionSource: 'agent',
+            agentBreakdown: results.map(r => ({
+                agent: r.agent,
+                online: r.success,
+                model: r.model || null,
+                error: r.error || null,
+                scores: r.success ? r.analysis.scores : null,
+                totalScore: r.success ? r.analysis.totalScore : null,
+                weight: WEIGHTS[r.agent as keyof typeof WEIGHTS] || 0,
+            }))
+        };
+
+        await saveProject(project);
 
         return NextResponse.json({
             success: true,
@@ -70,22 +99,19 @@ export async function POST(req: NextRequest) {
                 niche,
                 submitter: walletAddress,
                 source: 'agent',
-                timestamp: Date.now(),
+                timestamp: project.timestamp,
             },
             tribunalAnalysis: {
                 totalScore: finalScore,
-                breakdown: {
-                    feasibility: Math.round(weightedFeasibility * 100) / 100,
-                    marketDisruption: Math.round(weightedMarket * 100) / 100,
-                    narrativeStrength: Math.round(weightedNarrative * 100) / 100,
-                },
-                rationale: successfulAgents.sort((a, b) => (WEIGHTS[b.agent as keyof typeof WEIGHTS] || 0) - (WEIGHTS[a.agent as keyof typeof WEIGHTS] || 0))[0].analysis.rationale,
+                breakdown: project.scores,
+                rationale: primaryRationale,
                 agentsConsulted: successfulAgents.length,
             },
             message: "Project analyzed by the Moltberg Tribunal. Submission recorded in protocol logs."
         });
 
     } catch (error) {
+        console.error('[AGENT_API_ERROR]', error);
         return NextResponse.json({ error: 'Internal error' }, { status: 500 });
     }
 }

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "p-agent-1773286159546",
+    "name": "Neural Mesh",
+    "pitch": "A decentralized brain-computer interface protocol.",
+    "niche": "Bio-Hacking",
+    "scores": {
+      "feasibility": 13.6,
+      "marketDisruption": 12.9,
+      "narrativeStrength": 14.41
+    },
+    "totalScore": 40.91,
+    "rationale": {
+      "feasibility": "The pitch lacks technical details on how the decentralized brain-computer interface protocol will be implemented, and the current state of brain-computer interface technology makes it difficult to assess the feasibility of such a project.",
+      "marketDisruption": "While the idea of a brain-computer interface is intriguing, the pitch does not provide a clear understanding of the market size, competitive landscape, or potential disruption, making it hard to evaluate its market disruption potential.",
+      "narrativeStrength": "The narrative is vague and lacks a clear vision, making it unappealing to potential users and investors, and the concept of a decentralized brain-computer interface, although interesting, does not have a strong emotional resonance.",
+      "verdict": "VERDICT: REJECTED"
+    },
+    "aiPowered": true,
+    "timestamp": 1773286159546,
+    "submitter": "0x1234567890abcdef1234567890abcdef12345678",
+    "submissionSource": "agent",
+    "agentBreakdown": [
+      {
+        "agent": "moltberg",
+        "online": true,
+        "model": "llama-3.3-70b-versatile",
+        "error": null,
+        "totalScore": 30,
+        "weight": 0.4
+      },
+      {
+        "agent": "bozworth",
+        "online": true,
+        "model": "llama-3.3-70b-versatile",
+        "error": null,
+        "totalScore": 23,
+        "weight": 0.3
+      },
+      {
+        "agent": "coxwell",
+        "online": true,
+        "model": "llama3.1-8b",
+        "error": null,
+        "totalScore": 73.35,
+        "weight": 0.3
+      }
+    ]
+  }
+]

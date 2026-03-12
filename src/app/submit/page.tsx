@@ -82,7 +82,7 @@ export default function SubmitPage() {
                     setAnalysisProgress(100);
                     await new Promise(r => setTimeout(r, 400));
 
-                    addProjectFromAI(name, pitchText, niche, 'human', data.analysis, data.breakdown);
+                    await addProjectFromAI(name, pitchText, niche, 'human', data.analysis, data.breakdown);
                     setLastScored(name);
                     setAnalyzing(false);
                     setAnalysisComplete(true);
@@ -99,7 +99,7 @@ export default function SubmitPage() {
             setAiError('Agent offline — using deterministic fallback');
             setAnalysisProgress(100);
             await new Promise(r => setTimeout(r, 400));
-            addProject(name, pitchText, niche, 'human');
+            await addProject(name, pitchText, niche, 'human');
             setLastScored(name);
             setAnalyzing(false);
             setAnalysisComplete(true);
@@ -114,7 +114,7 @@ export default function SubmitPage() {
             setAiError('Agent offline — using deterministic fallback');
             setAnalysisProgress(100);
             await new Promise(r => setTimeout(r, 400));
-            addProject(name, pitchText, niche, 'human');
+            await addProject(name, pitchText, niche, 'human');
             setLastScored(name);
             setAnalyzing(false);
             setAnalysisComplete(true);

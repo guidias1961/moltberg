@@ -72,14 +72,15 @@ interface MoltbergStore {
     /* ─ Projects ─ */
     projects: Project[];
     selectedProject: Project | null;
-    addProject: (name: string, pitch: string, niche: Niche, source: 'human' | 'agent') => void;
+    fetchProjects: () => Promise<void>;
+    addProject: (name: string, pitch: string, niche: Niche, source: 'human' | 'agent') => Promise<void>;
     addProjectFromAI: (name: string, pitch: string, niche: Niche, source: 'human' | 'agent', analysis: {
         feasibility: number;
         marketDisruption: number;
         narrativeStrength: number;
         totalScore: number;
         rationale: ScoreRationale;
-    }, breakdown?: AgentBreakdown[]) => void;
+    }, breakdown?: AgentBreakdown[]) => Promise<void>;
     selectProject: (project: Project | null) => void;
 
     /* ─ Fee Pool (live ticker) ─ */
@@ -347,7 +348,20 @@ export const useMoltbergStore = create<MoltbergStore>((set, get) => ({
     projects: [],
     selectedProject: null,
     selectProject: (project) => set({ selectedProject: project }),
-    addProject: (name, pitch, niche, source) => {
+
+    fetchProjects: async () => {
+        try {
+            const res = await fetch('/api/projects');
+            const data = await res.json();
+            if (data.success) {
+                set({ projects: data.projects });
+            }
+        } catch (error) {
+            console.error('Failed to fetch projects:', error);
+        }
+    },
+
+    addProject: async (name, pitch, niche, source) => {
         const scores = scoreProject(name, pitch, niche);
         const totalScore = Math.round((scores.feasibility + scores.marketDisruption + scores.narrativeStrength) * 100) / 100;
         const rationale = generateRationale(name, pitch, niche, scores, totalScore);
@@ -365,10 +379,22 @@ export const useMoltbergStore = create<MoltbergStore>((set, get) => ({
             submitter: walletAddr,
             submissionSource: source,
         };
-        const projects = [...get().projects, proj].sort((a, b) => b.totalScore - a.totalScore);
-        set({ projects });
+
+        try {
+            // Persist globally
+            await fetch('/api/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(proj),
+            });
+            // Update local state by re-fetching or optimistic update
+            await get().fetchProjects();
+        } catch (error) {
+            console.error('Failed to persist project:', error);
+        }
     },
-    addProjectFromAI: (name, pitch, niche, source, analysis, breakdown) => {
+
+    addProjectFromAI: async (name, pitch, niche, source, analysis, breakdown) => {
         const walletAddr = get().walletAddress || '0x0000...0000';
         const proj: Project = {
             id: `p-${Date.now()}`,
@@ -388,8 +414,19 @@ export const useMoltbergStore = create<MoltbergStore>((set, get) => ({
             submitter: walletAddr,
             submissionSource: source,
         };
-        const projects = [...get().projects, proj].sort((a, b) => b.totalScore - a.totalScore);
-        set({ projects });
+
+        try {
+            // Persist globally
+            await fetch('/api/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(proj),
+            });
+            // Update local state
+            await get().fetchProjects();
+        } catch (error) {
+            console.error('Failed to persist project:', error);
+        }
     },
 
     feePool: 847_291.42,

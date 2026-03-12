@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useMoltbergStore } from '@/store/store';
+import { useEffect } from 'react';
 import Image from 'next/image';
 
 const NAV_ITEMS = [
@@ -14,7 +15,13 @@ const NAV_ITEMS = [
 
 export default function Navigation() {
     const pathname = usePathname();
-    const { phase } = useMoltbergStore();
+    const { phase, fetchProjects } = useMoltbergStore();
+
+    useEffect(() => {
+        if (phase === 'dashboard') {
+            fetchProjects();
+        }
+    }, [phase, fetchProjects]);
 
     if (phase === 'intro') return null;
 

@@ -7,6 +7,7 @@ import ProjectDetail from '@/components/ProjectDetail';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMoltbergStore } from '@/store/store';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 const DataStream = dynamic(() => import('@/components/DataStream'), { ssr: false });
@@ -20,8 +21,14 @@ const NICHE_STYLES: Record<string, { text: string; bg: string; border: string }>
 };
 
 export default function LeaderboardPage() {
-    const { projects, feePool, phase, selectProject } = useMoltbergStore();
+    const { projects, feePool, phase, selectProject, fetchProjects } = useMoltbergStore();
     const router = useRouter();
+
+    useEffect(() => {
+        if (phase === 'dashboard') {
+            fetchProjects();
+        }
+    }, [phase, fetchProjects]);
 
     if (phase === 'intro') {
         router.push('/');
