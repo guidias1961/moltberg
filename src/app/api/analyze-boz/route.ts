@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { runBozworthAnalysis } from '@/lib/agents/bozworth';
 
-export const runtime = 'edge';
+export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
     try {

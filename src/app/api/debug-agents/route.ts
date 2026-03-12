@@ -3,7 +3,7 @@ import { runMoltbergAnalysis } from '@/lib/agents/moltberg';
 import { runBozworthAnalysis } from '@/lib/agents/bozworth';
 import { runCoxwellAnalysis } from '@/lib/agents/coxwell';
 
-export const runtime = 'edge';
+export const maxDuration = 30;
 
 export async function GET(req: NextRequest) {
     try {

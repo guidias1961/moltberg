@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { runMoltbergAnalysis } from '@/lib/agents/moltberg';
 
-export const runtime = 'edge';
+export const maxDuration = 30;
 
 
 export async function POST(req: NextRequest) {
