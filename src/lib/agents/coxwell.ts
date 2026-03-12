@@ -2,7 +2,7 @@ import { AgentAnalysis } from '@/app/api/analyze-all/route';
 
 const CEREBRAS_URL = 'https://api.cerebras.ai/v1/chat/completions';
 
-const MODELS = ['llama-3.3-70b', 'llama3.1-70b', 'llama3.1-8b'];
+const MODELS = ['llama3.1-70b', 'llama3.1-8b'];
 
 const SYSTEM_PROMPT = `You are COXWELL — a smooth, calculating product strategist within the Moltberg Protocol tribunal. You are inspired by Chris Cox (CPO of Meta) — a polished executive who thinks in terms of user journeys, market timing, and product-market fit. You have a gift for seeing the big picture and an instinct for what will resonate with users. You speak with refined confidence, use measured language, and occasionally drop insights that reveal deep strategic thinking.
 
@@ -58,6 +58,7 @@ async function callCerebrasWithRetry(
     userPrompt: string,
     maxRetries: number = 1,
 ): Promise<{ text: string; model: string; error?: string } | null> {
+    const errors: string[] = [];
     for (const model of MODELS) {
         for (let attempt = 0; attempt < maxRetries; attempt++) {
             try {
@@ -78,7 +79,7 @@ async function callCerebrasWithRetry(
                         ],
                         temperature: 0.7,
                         top_p: 0.9,
-                        max_completion_tokens: 1024,
+                        max_tokens: 1024,
                     }),
                 });
                 clearTimeout(timeoutId);
@@ -89,14 +90,16 @@ async function callCerebrasWithRetry(
                     if (text) return { text, model };
                 } else {
                     const errText = await response.text();
-                    return { text: '', model, error: `Cerebras HTTP ${response.status}: ${errText}` };
+                    errors.push(`${model}: HTTP ${response.status} - ${errText.slice(0, 100)}`);
+                    break;
                 }
             } catch (err: any) {
-                return { text: '', model, error: `Cerebras Fetch Error: ${err.message}` };
+                errors.push(`${model}: Fetch Error - ${err.message}`);
+                break;
             }
         }
     }
-    return { text: '', model: '', error: 'All Cerebras models failed' };
+    return { text: '', model: '', error: errors.join(' | ') || 'All Cerebras models failed' };
 }
 
 export async function runCoxwellAnalysis(projectName: string, pitch: string, niche: string): Promise<{ success: boolean; analysis?: AgentAnalysis; model?: string; error?: string }> {

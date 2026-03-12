@@ -3,7 +3,6 @@ import { AgentAnalysis } from '@/app/api/analyze-all/route';
 const MODELS = [
     'gemini-2.0-flash',
     'gemini-1.5-flash',
-    'gemini-1.5-pro',
 ];
 
 function getGeminiUrl(model: string) {
@@ -59,7 +58,7 @@ async function callGeminiWithRetry(
     userPrompt: string,
     maxRetries: number = 1,
 ): Promise<{ text: string; model: string; error?: string } | null> {
-    let lastError = '';
+    const errors: string[] = [];
     for (const model of MODELS) {
         for (let attempt = 0; attempt < maxRetries; attempt++) {
             try {
@@ -95,18 +94,18 @@ async function callGeminiWithRetry(
                     if (text) return { text, model };
                 } else {
                     const errText = await response.text();
-                    lastError = `Gemini HTTP ${response.status} (${model}): ${errText}`;
-                    console.error(`[MOLTBERG] ${lastError}`);
+                    errors.push(`${model}: HTTP ${response.status} - ${errText.slice(0, 100)}`);
+                    console.error(`[MOLTBERG] ${model}: HTTP ${response.status} - ${errText}`);
                     break; // Try next model
                 }
             } catch (err: any) {
-                lastError = `Gemini Fetch Error (${model}): ${err.message}`;
-                console.error(`[MOLTBERG] ${lastError}`);
+                errors.push(`${model}: Fetch Error - ${err.message}`);
+                console.error(`[MOLTBERG] ${model}: Fetch Error - ${err.message}`);
                 break; // Try next model
             }
         }
     }
-    return { text: '', model: '', error: lastError || 'All Gemini models failed' };
+    return { text: '', model: '', error: errors.join(' | ') || 'All Gemini models failed' };
 }
 
 export async function runMoltbergAnalysis(projectName: string, pitch: string, niche: string): Promise<{ success: boolean; analysis?: AgentAnalysis; model?: string; error?: string }> {
