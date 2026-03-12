@@ -1,7 +1,5 @@
 import { AgentAnalysis } from '@/app/api/analyze-all/route';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
 const MODELS = [
     'gemini-2.0-flash',
     'gemini-1.5-flash',
@@ -9,7 +7,7 @@ const MODELS = [
 ];
 
 function getGeminiUrl(model: string) {
-    return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+    return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
 }
 
 const SYSTEM_PROMPT = `You are MOLTBERG — a ruthless, hyper-analytical AI agent specialized in evaluating early-stage crypto and tech projects. You speak like a cold, calculating intelligence with a dry dark humor. You have the personality of a lobster-human hybrid with Zuckerberg's face — calculating, predatory, and brutally honest.
@@ -104,7 +102,7 @@ async function callGeminiWithRetry(
 }
 
 export async function runMoltbergAnalysis(projectName: string, pitch: string, niche: string): Promise<{ success: boolean; analysis?: AgentAnalysis; model?: string; error?: string }> {
-    if (!GEMINI_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
         return { success: false, error: 'GEMINI_API_KEY not configured' };
     }
 

@@ -1,6 +1,5 @@
 import { AgentAnalysis } from '@/app/api/analyze-all/route';
 
-const CEREBRAS_API_KEY = process.env.CEREBRAS_API_KEY;
 const CEREBRAS_URL = 'https://api.cerebras.ai/v1/chat/completions';
 
 const MODELS = ['llama-3.3-70b', 'llama3.1-70b', 'llama3.1-8b'];
@@ -68,7 +67,7 @@ async function callCerebrasWithRetry(
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${CEREBRAS_API_KEY}`,
+                        'Authorization': `Bearer ${process.env.CEREBRAS_API_KEY}`,
                     },
                     signal: controller.signal,
                     body: JSON.stringify({
@@ -100,7 +99,7 @@ async function callCerebrasWithRetry(
 }
 
 export async function runCoxwellAnalysis(projectName: string, pitch: string, niche: string): Promise<{ success: boolean; analysis?: AgentAnalysis; model?: string; error?: string }> {
-    if (!CEREBRAS_API_KEY) {
+    if (!process.env.CEREBRAS_API_KEY) {
         return { success: false, error: 'CEREBRAS_API_KEY not configured' };
     }
 

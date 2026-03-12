@@ -1,6 +1,5 @@
 import { AgentAnalysis } from '@/app/api/analyze-all/route';
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 const MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
@@ -68,7 +67,7 @@ async function callGroqWithRetry(
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${GROQ_API_KEY}`,
+                        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
                     },
                     signal: controller.signal,
                     body: JSON.stringify({
@@ -100,7 +99,7 @@ async function callGroqWithRetry(
 }
 
 export async function runBozworthAnalysis(projectName: string, pitch: string, niche: string): Promise<{ success: boolean; analysis?: AgentAnalysis; model?: string; error?: string }> {
-    if (!GROQ_API_KEY) {
+    if (!process.env.GROQ_API_KEY) {
         return { success: false, error: 'GROQ_API_KEY not configured' };
     }
 
