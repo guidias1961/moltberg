@@ -10,6 +10,7 @@ const NICHES: { id: Niche; icon: string; color: string }[] = [
     { id: 'AI Agent Economy', icon: '⧫', color: 'from-purple-600/20 to-pink-600/10 border-purple-500/40 hover:border-purple-400' },
     { id: 'Hardware Innovation', icon: '⬡', color: 'from-green-600/20 to-emerald-600/10 border-green-500/40 hover:border-green-400' },
     { id: 'Bio-Hacking', icon: '⌬', color: 'from-rose-600/20 to-amber-600/10 border-rose-500/40 hover:border-rose-400' },
+    { id: 'Others', icon: '◈', color: 'from-gray-600/20 to-slate-600/10 border-gray-500/40 hover:border-gray-400' },
 ];
 
 const ANALYSIS_STAGES: Record<Niche, string[]> = {
@@ -18,6 +19,7 @@ const ANALYSIS_STAGES: Record<Niche, string[]> = {
     'AI Agent Economy': ['Decomposing agent stack...', 'Evaluating inference cost curve...', 'Mapping autonomy vectors...', 'Stress-testing decision loops...', 'Scoring scalability index...', 'Compiling Moltberg verdict...'],
     'Hardware Innovation': ['Scanning BOM feasibility...', 'Modeling supply chain risk...', 'Estimating unit economics...', 'Evaluating IP defensibility...', 'Scoring production readiness...', 'Compiling Moltberg verdict...'],
     'Bio-Hacking': ['Parsing biometric pipeline...', 'Evaluating FDA pathway...', 'Mapping human-data ethics...', 'Scoring clinical viability...', 'Benchmarking wearable stack...', 'Compiling Moltberg verdict...'],
+    'Others': ['Identifying project core...', 'Evaluating market fit...', 'Analyzing execution risk...', 'Benchmarking scalability...', 'Scoring innovation index...', 'Compiling Moltberg verdict...'],
 };
 
 export default function InputChamber() {

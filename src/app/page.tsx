@@ -103,7 +103,7 @@ export default function Home() {
                                     >
                                         <StatCard label="Projects Scored" value={String(projects.length)} color="text-lobster" />
                                         <StatCard label="Fee Pool" value={`$${(feePool / 1000).toFixed(0)}K`} color="text-matrix" />
-                                        <StatCard label="Active Niches" value="5" color="text-purple-400" />
+                                        <StatCard label="Active Niches" value={String(new Set(projects.map(p => p.niche)).size)} color="text-purple-400" />
                                         <StatCard label="Top Score" value={projects[0]?.totalScore.toFixed(1) || '—'} color="text-yellow-400" />
                                     </motion.div>
                                 </div>

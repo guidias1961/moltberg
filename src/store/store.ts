@@ -7,7 +7,8 @@ export type Niche =
     | 'Social Fix'
     | 'AI Agent Economy'
     | 'Hardware Innovation'
-    | 'Bio-Hacking';
+    | 'Bio-Hacking'
+    | 'Others';
 
 export type AgentId = 'moltberg' | 'bozworth' | 'coxwell';
 
@@ -137,7 +138,8 @@ const NICHE_WEIGHTS: Record<Niche, { f: number; m: number; n: number }> = {
     'Social Fix': { f: 0.90, m: 1.00, n: 1.30 },
     'AI Agent Economy': { f: 1.20, m: 1.15, n: 0.90 },
     'Hardware Innovation': { f: 1.30, m: 0.95, n: 0.90 },
-    'Bio-Hacking': { f: 1.10, m: 1.10, n: 1.05 },
+    | 'Bio-Hacking': { f: 1.10, m: 1.10, n: 1.05 },
+'Others': { f: 1.00, m: 1.00, n: 1.00 },
 };
 
 function scoreProject(name: string, pitch: string, niche: Niche): ProjectScore {
@@ -234,6 +236,11 @@ const NICHE_CONTEXT: Record<Niche, { fContext: string; mContext: string; nContex
         fContext: 'Bio-hacking projects must navigate regulatory labyrinths and demonstrate ethical data handling from day one.',
         mContext: 'The convergence of biometrics and blockchain is pre-paradigm—first credible players capture outsized value.',
         nContext: 'Bio-hacking narratives need to balance futuristic vision with pragmatic safety and consent frameworks.',
+    },
+    'Others': {
+        fContext: 'Diverse projects require adaptable execution frameworks and clear path-to-market strategies.',
+        mContext: 'Unconventional disruption vectors often emerge from outside established niche paradigms.',
+        nContext: 'Generic or cross-niche narratives must synthesize complex value propositions into clear, resonant visions.',
     },
 };
 
@@ -429,7 +436,7 @@ export const useMoltbergStore = create<MoltbergStore>((set, get) => ({
         }
     },
 
-    feePool: 847_291.42,
+    feePool: 0,
     tickFeePool: () => {
         set((s) => {
             const delta = (Math.random() - 0.35) * 12.5;
