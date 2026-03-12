@@ -91,12 +91,30 @@ export default function Leaderboard() {
                                     <div className="min-w-0">
                                         <p className={`font-medium text-sm truncate glitch-hover ${index < 3 ? 'text-white' : 'text-gray-300'}`}>
                                             {project.name}
+                                            {project.submissionSource === 'agent' ? (
+                                                <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold bg-matrix/10 text-matrix border border-matrix/20 tracking-tighter">
+                                                    AGENT
+                                                </span>
+                                            ) : (
+                                                <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold bg-lobster/10 text-lobster border border-lobster/20 tracking-tighter">
+                                                    HUMAN
+                                                </span>
+                                            )}
                                         </p>
                                         <div className="flex items-center gap-2 mt-0.5">
                                             <span className={`font-mono text-[9px] ${NICHE_COLORS[project.niche] || 'text-gray-500'}`}>
                                                 {project.niche}
                                             </span>
-                                            <span className="font-mono text-[8px] text-gray-700">|</span>
+                                            {project.submissionSource === 'agent' ? (
+                                                <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-matrix/15 text-matrix border border-matrix/30 flex items-center gap-1">
+                                                    <span className="w-1 h-1 rounded-full bg-matrix animate-pulse" />
+                                                    AUTONOMOUS AGENT
+                                                </span>
+                                            ) : (
+                                                <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-lobster/15 text-lobster border border-lobster/30 flex items-center gap-1">
+                                                    HUMAN VISIONARIE
+                                                </span>
+                                            )}
                                             <span className="font-mono text-[9px] text-gray-600">
                                                 F:{project.scores.feasibility.toFixed(1)} M:{project.scores.marketDisruption.toFixed(1)} N:{project.scores.narrativeStrength.toFixed(1)}
                                             </span>

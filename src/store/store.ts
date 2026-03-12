@@ -55,6 +55,7 @@ export interface Project {
     agentBreakdown?: AgentBreakdown[];
     timestamp: number;
     submitter: string;
+    submissionSource: 'human' | 'agent';
 }
 
 type AppPhase = 'intro' | 'dashboard';
@@ -71,8 +72,8 @@ interface MoltbergStore {
     /* ─ Projects ─ */
     projects: Project[];
     selectedProject: Project | null;
-    addProject: (name: string, pitch: string, niche: Niche) => void;
-    addProjectFromAI: (name: string, pitch: string, niche: Niche, analysis: {
+    addProject: (name: string, pitch: string, niche: Niche, source: 'human' | 'agent') => void;
+    addProjectFromAI: (name: string, pitch: string, niche: Niche, source: 'human' | 'agent', analysis: {
         feasibility: number;
         marketDisruption: number;
         narrativeStrength: number;
@@ -310,37 +311,7 @@ function generateRationale(
     return { feasibility, marketDisruption, narrativeStrength, verdict };
 }
 
-/* ─── Seed projects ─── */
 
-function buildSeedProjects(): Project[] {
-    const entries: { name: string; pitch: string; niche: Niche; submitter: string }[] = [
-        { name: "NeuralVault", pitch: "Decentralized AI model marketplace with on-chain inference verification and royalty distribution.", niche: 'AI Agent Economy', submitter: '0xa3b1...d4e2' },
-        { name: "ChainMind", pitch: "Autonomous DAO governance engine powered by real-time NLP sentiment scoring of proposals.", niche: 'DeFi Disruption', submitter: '0x7f92...c1a8' },
-        { name: "QuantumLedger", pitch: "Post-quantum cryptographic middleware for L1 chains—drop-in security upgrade without forking.", niche: 'Hardware Innovation', submitter: '0x2d5c...f9b3' },
-        { name: "MetaForge", pitch: "Cross-chain NFT compositing protocol with provable rarity algorithms and verifiable lineage.", niche: 'DeFi Disruption', submitter: '0x8e41...a7d5' },
-        { name: "SynapseDAO", pitch: "Tokenized scientific-paper funding with dual-token bonding curves for peer-review incentives.", niche: 'Social Fix', submitter: '0xb6f3...e2c9' },
-        { name: "OracleSwarm", pitch: "Game-theory oracle network where data providers compete in prediction markets for truth consensus.", niche: 'AI Agent Economy', submitter: '0x5ca7...d8f1' },
-        { name: "BioSync", pitch: "Wearable-to-chain biometric data marketplace for decentralized clinical trials and health DAOs.", niche: 'Bio-Hacking', submitter: '0x1d89...b4a6' },
-    ];
-
-    return entries.map((e, i) => {
-        const scores = scoreProject(e.name, e.pitch, e.niche);
-        const totalScore = Math.round((scores.feasibility + scores.marketDisruption + scores.narrativeStrength) * 100) / 100;
-        const rationale = generateRationale(e.name, e.pitch, e.niche, scores, totalScore);
-        return {
-            id: `seed-${i}`,
-            name: e.name,
-            pitch: e.pitch,
-            niche: e.niche,
-            scores,
-            totalScore,
-            rationale,
-            aiPowered: false,
-            timestamp: Date.now() - (i + 1) * 3_600_000,
-            submitter: e.submitter,
-        };
-    }).sort((a, b) => b.totalScore - a.totalScore);
-}
 
 /* ─── Countdown target ─── */
 
@@ -373,10 +344,10 @@ export const useMoltbergStore = create<MoltbergStore>((set, get) => ({
     advanceIntro: () => set((s) => ({ introStep: Math.min(s.introStep + 1, 3) })),
     markIntroTextsDone: () => set({ introTextsDone: true }),
 
-    projects: buildSeedProjects(),
+    projects: [],
     selectedProject: null,
     selectProject: (project) => set({ selectedProject: project }),
-    addProject: (name, pitch, niche) => {
+    addProject: (name, pitch, niche, source) => {
         const scores = scoreProject(name, pitch, niche);
         const totalScore = Math.round((scores.feasibility + scores.marketDisruption + scores.narrativeStrength) * 100) / 100;
         const rationale = generateRationale(name, pitch, niche, scores, totalScore);
@@ -392,11 +363,12 @@ export const useMoltbergStore = create<MoltbergStore>((set, get) => ({
             aiPowered: false,
             timestamp: Date.now(),
             submitter: walletAddr,
+            submissionSource: source,
         };
         const projects = [...get().projects, proj].sort((a, b) => b.totalScore - a.totalScore);
         set({ projects });
     },
-    addProjectFromAI: (name, pitch, niche, analysis, breakdown) => {
+    addProjectFromAI: (name, pitch, niche, source, analysis, breakdown) => {
         const walletAddr = get().walletAddress || '0x0000...0000';
         const proj: Project = {
             id: `p-${Date.now()}`,
@@ -414,6 +386,7 @@ export const useMoltbergStore = create<MoltbergStore>((set, get) => ({
             agentBreakdown: breakdown,
             timestamp: Date.now(),
             submitter: walletAddr,
+            submissionSource: source,
         };
         const projects = [...get().projects, proj].sort((a, b) => b.totalScore - a.totalScore);
         set({ projects });

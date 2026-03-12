@@ -79,6 +79,16 @@ export default function ProjectDetail() {
                                     <span className={`font-mono text-[10px] px-2 py-0.5 rounded border ${nicheStyle}`}>
                                         {project.niche}
                                     </span>
+                                    {project.submissionSource === 'agent' ? (
+                                        <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-matrix/15 text-matrix border border-matrix/30 flex items-center gap-1">
+                                            <span className="w-1 h-1 rounded-full bg-matrix animate-pulse" />
+                                            AUTONOMOUS AGENT
+                                        </span>
+                                    ) : (
+                                        <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-lobster/15 text-lobster border border-lobster/30 flex items-center gap-1">
+                                            HUMAN VISIONARIE
+                                        </span>
+                                    )}
                                     <span className="font-mono text-[10px] text-gray-600">
                                         {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </span>
