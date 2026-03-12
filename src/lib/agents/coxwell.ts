@@ -62,7 +62,7 @@ async function callCerebrasWithRetry(
         for (let attempt = 0; attempt < maxRetries; attempt++) {
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second strict timeout
+                const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout for edge runtime
                 const response = await fetch(CEREBRAS_URL, {
                     method: 'POST',
                     headers: {
