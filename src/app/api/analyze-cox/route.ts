@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { runCoxwellAnalysis } from '@/lib/agents/coxwell';
 
 export const runtime = 'edge';
-export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
     try {
