@@ -389,7 +389,7 @@ export const useMoltbergStore = create<MoltbergStore>((set, get) => ({
             rationale,
             aiPowered: false,
             timestamp: Date.now(),
-            submitter: `${walletAddr.slice(0, 6)}...${walletAddr.slice(-4)}`,
+            submitter: walletAddr,
         };
         const projects = [...get().projects, proj].sort((a, b) => b.totalScore - a.totalScore);
         set({ projects });
@@ -411,7 +411,7 @@ export const useMoltbergStore = create<MoltbergStore>((set, get) => ({
             aiPowered: true,
             agentBreakdown: breakdown,
             timestamp: Date.now(),
-            submitter: `${walletAddr.slice(0, 6)}...${walletAddr.slice(-4)}`,
+            submitter: walletAddr,
         };
         const projects = [...get().projects, proj].sort((a, b) => b.totalScore - a.totalScore);
         set({ projects });

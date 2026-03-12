@@ -101,7 +101,11 @@ export default function ProjectDetail() {
                                 &quot;{project.pitch}&quot;
                             </p>
                             <div className="flex items-center gap-3 mt-2">
-                                <span className="font-mono text-[10px] text-gray-600">Submitter: {project.submitter}</span>
+                                <span className="font-mono text-[10px] text-gray-600">
+                                    Submitter: {project.submitter && project.submitter.length > 20
+                                        ? `${project.submitter.slice(0, 6)}...${project.submitter.slice(-4)}`
+                                        : project.submitter}
+                                </span>
                             </div>
                         </div>
 

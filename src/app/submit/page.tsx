@@ -27,7 +27,7 @@ const ANALYSIS_STAGES: Record<Niche, string[]> = {
 };
 
 export default function SubmitPage() {
-    const { phase, addProject, addProjectFromAI, isAnalyzing, analysisProgress, setAnalyzing, setAnalysisProgress } = useMoltbergStore();
+    const { phase, addProject, addProjectFromAI, isAnalyzing, analysisProgress, setAnalyzing, setAnalysisProgress, walletAddress, connectWallet } = useMoltbergStore();
     const router = useRouter();
     const [selectedNiche, setSelectedNiche] = useState<Niche | null>(null);
     const [projectName, setProjectName] = useState('');
@@ -156,7 +156,7 @@ export default function SubmitPage() {
                                     Submit Your Vision
                                 </h1>
                                 <p className="font-mono text-[11px] text-gray-500">
-                                    Select a niche, describe your project, and let MOLTBERG score it.
+                                    Select a niche, connect your Base wallet, and submit your vision for tribunal scoring.
                                 </p>
                             </div>
                         </div>
@@ -410,13 +410,22 @@ export default function SubmitPage() {
                                             </div>
                                         </div>
 
-                                        <button
-                                            onClick={runAnalysis}
-                                            disabled={isAnalyzing || !projectName.trim() || pitch.trim().length < 20}
-                                            className="submit-btn w-full text-sm disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:transform-none disabled:hover:shadow-none"
-                                        >
-                                            {isAnalyzing ? '◈ ANALYZING...' : '◈ SUBMIT FOR TRIBUNAL ANALYSIS'}
-                                        </button>
+                                        {!walletAddress ? (
+                                            <button
+                                                onClick={connectWallet}
+                                                className="submit-btn w-full text-sm !border-matrix/50 !text-matrix hover:!bg-matrix/10"
+                                            >
+                                                ◈ CONNECT WALLET TO SUBMIT
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={runAnalysis}
+                                                disabled={isAnalyzing || !projectName.trim() || pitch.trim().length < 20}
+                                                className="submit-btn w-full text-sm disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:transform-none disabled:hover:shadow-none"
+                                            >
+                                                {isAnalyzing ? '◈ ANALYZING...' : '◈ SUBMIT FOR TRIBUNAL ANALYSIS'}
+                                            </button>
+                                        )}
                                     </motion.div>
                                 )}
                             </div>
