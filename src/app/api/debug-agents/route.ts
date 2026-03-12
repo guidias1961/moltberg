@@ -13,14 +13,16 @@ export async function GET(req: NextRequest) {
 
         console.log("Starting debug run");
 
-        const mResult = await runMoltbergAnalysis(projectName, pitch, niche).catch(e => ({ error: String(e), stack: e?.stack }));
-        const bResult = await runBozworthAnalysis(projectName, pitch, niche).catch(e => ({ error: String(e), stack: e?.stack }));
-        const cResult = await runCoxwellAnalysis(projectName, pitch, niche).catch(e => ({ error: String(e), stack: e?.stack }));
+        const results = await Promise.allSettled([
+            runMoltbergAnalysis(projectName, pitch, niche),
+            runBozworthAnalysis(projectName, pitch, niche),
+            runCoxwellAnalysis(projectName, pitch, niche)
+        ]);
 
         return NextResponse.json({
-            moltberg: mResult,
-            bozworth: bResult,
-            coxwell: cResult,
+            moltberg: results[0],
+            bozworth: results[1],
+            coxwell: results[2],
             envVars: {
                 hasGemini: !!process.env.GEMINI_API_KEY,
                 hasGroq: !!process.env.GROQ_API_KEY,
