@@ -130,6 +130,7 @@ export async function POST(req: NextRequest) {
             agent: r.agent,
             online: r.success,
             model: r.model || null,
+            error: r.error || null,
             scores: r.success && r.analysis ? {
                 feasibility: r.analysis.feasibility,
                 marketDisruption: r.analysis.marketDisruption,

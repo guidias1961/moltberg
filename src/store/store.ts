@@ -31,6 +31,7 @@ export interface AgentBreakdown {
     scores: ProjectScore | null;
     totalScore: number | null;
     rationale: ScoreRationale | null;
+    error?: string | null;
     weight: number;
 }
 
