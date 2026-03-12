@@ -138,8 +138,8 @@ const NICHE_WEIGHTS: Record<Niche, { f: number; m: number; n: number }> = {
     'Social Fix': { f: 0.90, m: 1.00, n: 1.30 },
     'AI Agent Economy': { f: 1.20, m: 1.15, n: 0.90 },
     'Hardware Innovation': { f: 1.30, m: 0.95, n: 0.90 },
-    | 'Bio-Hacking': { f: 1.10, m: 1.10, n: 1.05 },
-'Others': { f: 1.00, m: 1.00, n: 1.00 },
+    'Bio-Hacking': { f: 1.10, m: 1.10, n: 1.05 },
+    'Others': { f: 1.00, m: 1.00, n: 1.00 },
 };
 
 function scoreProject(name: string, pitch: string, niche: Niche): ProjectScore {
