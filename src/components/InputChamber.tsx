@@ -43,7 +43,7 @@ export default function InputChamber() {
                 clearInterval(interval);
                 setAnalysisProgress(100);
                 setTimeout(() => {
-                    addProject(projectName.trim(), pitch.trim(), selectedNiche);
+                    addProject(projectName.trim(), pitch.trim(), selectedNiche, 'human');
                     setLastScored(projectName.trim());
                     setAnalyzing(false);
                     setAnalysisComplete(true);
