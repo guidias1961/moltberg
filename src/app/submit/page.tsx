@@ -16,6 +16,7 @@ const NICHES: { id: Niche; icon: string; desc: string; color: string }[] = [
     { id: 'AI Agent Economy', icon: '⧫', desc: 'Autonomous agents, inference markets, and decentralized intelligence.', color: 'from-purple-600/20 to-pink-600/10 border-purple-500/40 hover:border-purple-400' },
     { id: 'Hardware Innovation', icon: '⬡', desc: 'Physical infrastructure, DePIN, and hardware-accelerated networks.', color: 'from-green-600/20 to-emerald-600/10 border-green-500/40 hover:border-green-400' },
     { id: 'Bio-Hacking', icon: '⌬', desc: 'Biometrics, health DAOs, and the convergence of biology and blockchain.', color: 'from-rose-600/20 to-amber-600/10 border-rose-500/40 hover:border-rose-400' },
+    { id: 'Others', icon: '◈', desc: 'General innovation, unconventional disruption, and cross-niche visions.', color: 'from-gray-600/20 to-slate-600/10 border-gray-500/40 hover:border-gray-400' },
 ];
 
 const ANALYSIS_STAGES: Record<Niche, string[]> = {
@@ -24,6 +25,7 @@ const ANALYSIS_STAGES: Record<Niche, string[]> = {
     'AI Agent Economy': ['MOLTBERG decomposing agent stack...', 'BOZWORTH auditing inference pipeline...', 'COXWELL evaluating autonomy narrative...', 'Cross-agent consensus forming...', 'Computing weighted verdict...', 'Tribunal complete.'],
     'Hardware Innovation': ['MOLTBERG scanning BOM feasibility...', 'BOZWORTH stress-testing supply chain...', 'COXWELL evaluating market readiness...', 'Cross-agent consensus forming...', 'Computing weighted verdict...', 'Tribunal complete.'],
     'Bio-Hacking': ['MOLTBERG parsing biometric pipeline...', 'BOZWORTH auditing data architecture...', 'COXWELL evaluating health narrative...', 'Cross-agent consensus forming...', 'Computing weighted verdict...', 'Tribunal complete.'],
+    'Others': ['MOLTBERG identifying project core...', 'BOZWORTH evaluating market fit...', 'COXWELL analyzing innovation narrative...', 'Cross-agent consensus forming...', 'Computing weighted verdict...', 'Tribunal complete.'],
 };
 
 export default function SubmitPage() {
